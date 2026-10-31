@@ -32,7 +32,9 @@ const state = {
   query: "",
   activeCategory: null,
   mode: "delivery",
+  address: null,
   delivery: null,
+  deliveryIssue: null,
   orderCode: null,
 };
 
@@ -311,10 +313,16 @@ function checkDelivery(address) {
 }
 
 function fullAddress() {
-  if (!state.delivery) return "";
-  return [state.delivery.address, $("#addressDetail").value.trim()].filter(Boolean).join(" ");
+  if (!state.address) return "";
+  return [state.address.text, $("#addressDetail").value.trim()].filter(Boolean).join(" ");
 }
 
+const OUT_OF_ZONE = {
+  blocked: "이 지역은 배달이 어려워요. 픽업으로 주문하시거나 매장으로 문의해 주세요.",
+  unknown: "배달 지역이 아니에요. 픽업으로 주문하시거나 매장으로 문의해 주세요.",
+};
+
+// 주소는 배달 가능 여부와 상관없이 반영하고, 배달 지역이 아니면 state.delivery만 비워 둔다.
 // matchText: 주소 검색 결과의 법정동·건물명처럼 판정에만 쓰는 추가 문자열
 function updateDelivery(address, { silent = false, matchText = "" } = {}) {
   const error = $("#deliveryError");
@@ -323,40 +331,45 @@ function updateDelivery(address, { silent = false, matchText = "" } = {}) {
     error.hidden = false;
     return;
   }
-  const zone = checkDelivery(`${address} ${matchText}`);
-  if (!zone || zone.blocked) {
-    state.delivery = null;
-    error.textContent = zone?.blocked
-      ? "죄송해요, 이 지역은 배달이 어려워요. 픽업으로 주문해 주세요."
-      : "배달 지역을 찾지 못했어요. 단지명이나 동 이름을 넣어 주시거나 매장으로 문의해 주세요.";
-    error.hidden = false;
-    renderDelivery();
-    return;
-  }
   error.hidden = true;
-  state.delivery = { ...zone, address: address.trim(), matchText };
+  const zone = checkDelivery(`${address} ${matchText}`);
+  state.address = { text: address.trim(), matchText };
+  state.delivery = zone && !zone.blocked ? zone : null;
+  state.deliveryIssue = state.delivery ? null : zone?.blocked ? "blocked" : "unknown";
   saveForm();
   renderDelivery();
-  if (!silent) {
+  if (silent) return;
+  if (state.delivery) {
     showToast(`배달 가능해요 · 배달팁 ${money(zone.fee)}`);
     $("#addressDetail").focus();
+  } else {
+    $("#addressSection").scrollIntoView({ behavior: "smooth", block: "center" });
   }
 }
 
 function renderDelivery() {
-  const done = Boolean(state.delivery);
-  $("#addressEdit").hidden = done;
-  $("#addressDone").hidden = !done;
-  if (done) {
-    $("#addressText").textContent = state.delivery.address;
-    $("#zoneName").textContent = `${state.delivery.name} · 배달팁 ${money(state.delivery.fee)}`;
+  const picked = Boolean(state.address);
+  const ok = Boolean(state.delivery);
+  $("#addressEdit").hidden = picked;
+  $("#addressDone").hidden = !picked;
+  if (picked) {
+    $("#addressText").textContent = state.address.text;
+    $("#zoneName").textContent = ok ? `${state.delivery.name} · 배달팁 ${money(state.delivery.fee)}` : "배달 불가 지역";
+    $("#zoneName").classList.toggle("is-error", !ok);
+    $("#zoneWarning").hidden = ok;
+    $("#zoneWarningText").textContent = OUT_OF_ZONE[state.deliveryIssue] ?? "";
+    $("#addressDetail").hidden = !ok;
   }
-  $("#feeText").textContent = done ? money(state.delivery.fee) : `${money(STORE.deliveryFee)}~`;
+  $("#feeText").textContent = ok ? money(state.delivery.fee) : `${money(STORE.deliveryFee)}~`;
   $("#sheetModeTitle").textContent = isPickup() ? "픽업" : "배달 주소";
   document.querySelector("[data-goto-address]").hidden = isPickup();
   const address = $("#sheetAddress");
-  address.textContent = isPickup() ? "매장에서 직접 받아가요." : done ? fullAddress() : "배달 주소를 먼저 확인해 주세요.";
-  address.classList.toggle("is-missing", !isPickup() && !done);
+  address.textContent = isPickup() ? "매장에서 직접 받아가요."
+    : ok ? fullAddress()
+    : picked ? `${state.address.text}
+배달 불가 지역이에요. 주소를 바꾸거나 픽업으로 주문해 주세요.`
+    : "배달 주소를 먼저 확인해 주세요.";
+  address.classList.toggle("is-missing", !isPickup() && !ok);
   renderCart();
 }
 
@@ -460,7 +473,8 @@ function buildOrderText() {
 
 function validateOrder() {
   const { subtotal } = totals();
-  if (!isPickup() && !state.delivery) return "배달 주소를 먼저 확인해 주세요.";
+  if (!isPickup() && !state.address) return "배달 주소를 먼저 확인해 주세요.";
+  if (!isPickup() && !state.delivery) return "배달 불가 지역이에요. 주소를 바꾸거나 픽업으로 주문해 주세요.";
   if (cartDetails().length === 0) return "주문할 메뉴를 담아 주세요.";
   if (subtotal < STORE.minimumOrder) return `메뉴 금액이 ${money(STORE.minimumOrder)} 이상이어야 주문할 수 있어요.`;
   if (!$("#customerName").value.trim()) return "주문하시는 분 이름을 입력해 주세요.";
@@ -506,7 +520,7 @@ function saveForm() {
   writeJson(FORM_KEY, {
     mode: state.mode,
     address: $("#address").value,
-    matchText: state.delivery?.matchText ?? "",
+    matchText: state.address?.matchText ?? "",
     addressDetail: $("#addressDetail").value,
     customerName: $("#customerName").value,
     requestNote: $("#requestNote").value,
@@ -573,6 +587,11 @@ document.querySelectorAll("[data-address]").forEach((button) => {
 });
 
 $("#addressChange").addEventListener("click", editAddress);
+$("#switchPickup").addEventListener("click", () => {
+  setMode("pickup");
+  showToast("픽업으로 바꿨어요. 매장에서 받아가세요.");
+});
+$("#researchAddress").addEventListener("click", openPostcode);
 $("#privacyAgree").addEventListener("change", () => {
   $(".check").classList.remove("is-invalid");
   showSheetError("");
@@ -594,7 +613,7 @@ $("#addMore").addEventListener("click", closeSheet);
 ["addressDetail", "customerName", "requestNote"].forEach((id) => {
   $(`#${id}`).addEventListener("input", () => {
     saveForm();
-    if (id === "addressDetail" && state.delivery) renderDelivery();
+    if (id === "addressDetail" && state.address) renderDelivery();
     else renderPreview();
   });
 });

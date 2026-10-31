@@ -7,7 +7,7 @@
     <meta name="description" content="찬팩토리 오늘의 반찬 문자 주문" />
     <title>찬팩토리 | 오늘의 반찬 주문</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-    <link rel="stylesheet" href="./styles.css?v=6" />
+    <link rel="stylesheet" href="./styles.css?v=7" />
   </head>
   <body>
     <header class="appbar" id="appbar">
@@ -64,6 +64,13 @@
               <span id="zoneName"></span>
             </div>
             <button type="button" id="addressChange" class="link-btn">변경</button>
+          </div>
+          <div id="zoneWarning" class="zone-warning" role="alert" hidden>
+            <p id="zoneWarningText"></p>
+            <div class="zone-warning__actions">
+              <button type="button" id="switchPickup" class="btn-dark">픽업으로 바꾸기</button>
+              <button type="button" id="researchAddress" class="btn-line">주소 다시 검색</button>
+            </div>
           </div>
           <input id="addressDetail" class="input" autocomplete="address-line2" placeholder="상세 주소 (예: 601동 1203호)" aria-label="상세 주소" />
         </div>
@@ -213,6 +220,6 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <script type="module" src="./app.js?v=6"></script>
+    <script type="module" src="./app.js?v=7"></script>
   </body>
 </html>

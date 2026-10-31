@@ -165,9 +165,7 @@ textarea.input { height: auto; padding: 13px 14px; resize: none; }
   display: block;
   font-size: 16px;
   font-weight: 700;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: keep-all;
 }
 .address-done__body span { font-size: 13.5px; color: var(--primary-strong); font-weight: 600; }
 
@@ -365,7 +363,7 @@ textarea.input { height: auto; padding: 13px 14px; resize: none; }
 .s-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .s-row h3 { margin: 0; }
 .s-sub { margin: 18px 0 8px; font-size: 14.5px; font-weight: 700; color: var(--ink-2); }
-.s-address { margin-top: 6px; font-size: 16px; }
+.s-address { margin-top: 6px; font-size: 16px; white-space: pre-line; }
 .s-address.is-missing { color: var(--red); font-weight: 600; }
 .muted-num { color: var(--primary-strong); }
 
@@ -569,3 +567,23 @@ textarea.input { height: auto; padding: 13px 14px; resize: none; }
 .check input:checked + .check__box { background: var(--primary); border-color: var(--primary); color: var(--white); }
 .check input:focus-visible + .check__box { outline: 2px solid var(--ink); outline-offset: 2px; }
 .check.is-invalid { border-color: var(--red); }
+
+/* ---------- 배달 불가 안내 ---------- */
+
+.address-done__body span.is-error { color: var(--red); }
+.zone-warning {
+  margin-bottom: 4px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #fff0f0;
+}
+.zone-warning p { font-size: 14.5px; font-weight: 600; color: var(--red); line-height: 1.5; }
+.zone-warning__actions { display: flex; gap: 8px; margin-top: 12px; }
+.zone-warning__actions button { flex: 1; height: 44px; font-size: 14.5px; }
+.btn-line {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--white);
+  font-weight: 700;
+  color: var(--ink);
+}
