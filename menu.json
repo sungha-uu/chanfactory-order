@@ -1,0 +1,33 @@
+{
+  "updatedAt": "2026-11-01T09:00:00+09:00",
+  "note": "테스트 데이터 - 재고 수량은 임의값. image에 사진 경로(예: images/1.jpg)를 넣으면 썸네일이 표시된다.",
+  "categories": [
+    {"name": "새롭게 만나는 반찬여행"},
+    {"name": "국&찌개"},
+    {"name": "김치류"},
+    {"name": "넉넉하고 맛좋은 메인메뉴"},
+    {"name": "기본팩 반찬류"}
+  ],
+  "items": [
+    {"id": 1, "name": "New) 매콤 순살 닭볶음탕", "category": "새롭게 만나는 반찬여행", "price": 6000, "stock": 8, "image": "images/1.jpg"},
+    {"id": 2, "name": "New) 간장카레 순살 닭볶음탕", "category": "새롭게 만나는 반찬여행", "price": 6000, "stock": 6, "image": "images/2.jpg"},
+    {"id": 3, "name": "New) 꼴뚜기무말랭이 조림", "category": "새롭게 만나는 반찬여행", "price": 2500, "stock": 10, "image": "images/3.jpg"},
+    {"id": 4, "name": "New) 북어채 간장조림", "category": "새롭게 만나는 반찬여행", "price": 2500, "stock": 3, "image": ""},
+    {"id": 5, "name": "소고기미역국", "category": "국&찌개", "price": 3000, "stock": 12, "unit": "1팩", "tag": "인기 4위", "image": "images/5.jpg"},
+    {"id": 6, "name": "꽃게찌개", "category": "국&찌개", "price": 3000, "stock": 0, "unit": "1팩", "image": "images/6.jpg"},
+    {"id": 7, "name": "짜장", "category": "국&찌개", "price": 3000, "stock": 7, "unit": "1팩", "image": ""},
+    {"id": 8, "name": "카레", "category": "국&찌개", "price": 3000, "stock": 9, "unit": "1팩", "image": ""},
+    {"id": 9, "name": "알타리김치", "category": "김치류", "price": 10000, "stock": 4, "unit": "대", "image": "images/9.jpg"},
+    {"id": 10, "name": "알타리김치", "category": "김치류", "price": 7000, "stock": 6, "unit": "소", "image": "images/10.jpg"},
+    {"id": 11, "name": "파김치", "category": "김치류", "price": 10000, "stock": 2, "unit": "대", "image": "images/11.jpg"},
+    {"id": 12, "name": "아이들이좋아하는 백김치", "category": "김치류", "price": 7000, "stock": 5, "image": "images/12.jpg"},
+    {"id": 13, "name": "소불고기", "category": "넉넉하고 맛좋은 메인메뉴", "price": 6000, "stock": 10, "image": "images/13.jpg"},
+    {"id": 14, "name": "[별미] 꼬막무침", "category": "넉넉하고 맛좋은 메인메뉴", "price": 3000, "stock": 0, "image": "images/14.jpg"},
+    {"id": 15, "name": "밥에비벼먹는 양념꼬막", "category": "넉넉하고 맛좋은 메인메뉴", "price": 3000, "stock": 8, "description": "참기름 살짝 넣어 밥에 비벼드시면 맛있는 꼬막비빔밥 완성", "image": "images/15.jpg"},
+    {"id": 16, "name": "비벼먹는 고추멸치볶음", "category": "넉넉하고 맛좋은 메인메뉴", "price": 3000, "stock": 11, "image": "images/16.jpg"},
+    {"id": 17, "name": "고사리나물", "category": "기본팩 반찬류", "price": 2500, "stock": 9, "image": "images/17.jpg"},
+    {"id": 18, "name": "취나물", "category": "기본팩 반찬류", "price": 2500, "stock": 7, "image": "images/18.jpg"},
+    {"id": 19, "name": "참나물", "category": "기본팩 반찬류", "price": 2500, "stock": 6, "image": "images/19.jpg"},
+    {"id": 20, "name": "시금치나물", "category": "기본팩 반찬류", "price": 2500, "stock": 0, "image": "images/20.jpg"}
+  ]
+}
