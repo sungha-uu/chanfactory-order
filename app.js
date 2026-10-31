@@ -313,14 +313,15 @@ function fullAddress() {
   return [state.delivery.address, $("#addressDetail").value.trim()].filter(Boolean).join(" ");
 }
 
-function updateDelivery(address, { silent = false } = {}) {
+// matchText: 주소 검색 결과의 법정동·건물명처럼 판정에만 쓰는 추가 문자열
+function updateDelivery(address, { silent = false, matchText = "" } = {}) {
   const error = $("#deliveryError");
   if (!address.trim()) {
     error.textContent = "주소를 입력해 주세요.";
     error.hidden = false;
     return;
   }
-  const zone = checkDelivery(address);
+  const zone = checkDelivery(`${address} ${matchText}`);
   if (!zone || zone.blocked) {
     state.delivery = null;
     error.textContent = zone?.blocked
@@ -331,10 +332,13 @@ function updateDelivery(address, { silent = false } = {}) {
     return;
   }
   error.hidden = true;
-  state.delivery = { ...zone, address: address.trim() };
+  state.delivery = { ...zone, address: address.trim(), matchText };
   saveForm();
   renderDelivery();
-  if (!silent) showToast(`배달 가능해요 · 배달팁 ${money(zone.fee)}`);
+  if (!silent) {
+    showToast(`배달 가능해요 · 배달팁 ${money(zone.fee)}`);
+    $("#addressDetail").focus();
+  }
 }
 
 function renderDelivery() {
@@ -342,7 +346,7 @@ function renderDelivery() {
   $("#addressEdit").hidden = done;
   $("#addressDone").hidden = !done;
   if (done) {
-    $("#addressText").textContent = fullAddress();
+    $("#addressText").textContent = state.delivery.address;
     $("#zoneName").textContent = `${state.delivery.name} · 배달팁 ${money(state.delivery.fee)}`;
   }
   $("#feeText").textContent = done ? money(state.delivery.fee) : `${money(STORE.deliveryFee)}~`;
@@ -357,7 +361,70 @@ function renderDelivery() {
 function editAddress() {
   $("#addressEdit").hidden = false;
   $("#addressDone").hidden = true;
-  $("#address").focus();
+}
+
+/* ---------- 주소 검색 (카카오 우편번호 서비스) ---------- */
+
+// 손님이 검색을 누를 때만 불러온다. 첫 주소가 막히면 예전 주소로 한 번 더 시도한다.
+const POSTCODE_SCRIPTS = [
+  "https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js",
+  "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js",
+];
+let postcodeReady;
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = () => { script.remove(); reject(new Error(src)); };
+    document.head.append(script);
+  });
+}
+
+function loadPostcode() {
+  postcodeReady ??= POSTCODE_SCRIPTS.reduce(
+    (attempt, src) => attempt.catch(() => loadScript(src).then(() => { if (!window.daum?.Postcode) throw new Error("no postcode"); })),
+    Promise.reject(),
+  ).catch((error) => { postcodeReady = null; throw error; });
+  return postcodeReady;
+}
+
+async function openPostcode() {
+  const layer = $("#postcodeLayer");
+  const frame = $("#postcodeFrame");
+  layer.hidden = false;
+  $("#postcodeError").hidden = true;
+  document.body.classList.add("is-locked");
+  try {
+    await loadPostcode();
+  } catch {
+    $("#postcodeError").hidden = false;
+    return;
+  }
+  frame.replaceChildren();
+  new window.daum.Postcode({
+    width: "100%",
+    height: "100%",
+    animation: false,
+    oncomplete: (data) => {
+      closePostcode();
+      applyPostcode(data);
+    },
+  }).embed(frame, { autoClose: false });
+}
+
+function closePostcode() {
+  $("#postcodeLayer").hidden = true;
+  document.body.classList.remove("is-locked");
+}
+
+function applyPostcode(data) {
+  const base = data.userSelectedType === "J" ? data.jibunAddress || data.autoJibunAddress : data.roadAddress || data.autoRoadAddress;
+  const building = data.buildingName && !base.includes(data.buildingName) ? ` (${data.buildingName})` : "";
+  const address = `${base}${building}`;
+  $("#address").value = address;
+  updateDelivery(address, { matchText: [data.bname, data.bname1, data.buildingName, data.jibunAddress, data.autoJibunAddress].filter(Boolean).join(" ") });
 }
 
 /* ---------- 주문 문자 ---------- */
@@ -431,6 +498,7 @@ function saveForm() {
   writeJson(FORM_KEY, {
     mode: state.mode,
     address: $("#address").value,
+    matchText: state.delivery?.matchText ?? "",
     addressDetail: $("#addressDetail").value,
     customerName: $("#customerName").value,
     requestNote: $("#requestNote").value,
@@ -442,7 +510,7 @@ function restoreForm() {
   ["address", "addressDetail", "customerName", "requestNote"].forEach((key) => {
     if (saved[key]) $(`#${key}`).value = saved[key];
   });
-  if (saved.address) updateDelivery(saved.address, { silent: true });
+  if (saved.address) updateDelivery(saved.address, { silent: true, matchText: saved.matchText ?? "" });
   setMode(saved.mode === "pickup" ? "pickup" : "delivery");
 }
 
@@ -497,6 +565,13 @@ document.querySelectorAll("[data-address]").forEach((button) => {
 });
 
 $("#addressChange").addEventListener("click", editAddress);
+$("#postcodeOpen").addEventListener("click", openPostcode);
+$("#postcodeClose").addEventListener("click", closePostcode);
+$("#manualToggle").addEventListener("click", () => {
+  $("#addressForm").hidden = false;
+  $("#manualToggle").hidden = true;
+  $("#address").focus();
+});
 document.querySelector("[data-goto-address]").addEventListener("click", () => {
   closeSheet();
   editAddress();
@@ -527,7 +602,8 @@ $("#cartToggle").addEventListener("click", () => {
 $("#sheetClose").addEventListener("click", closeSheet);
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
-  if (!$("#doneView").hidden) showDone(false);
+  if (!$("#postcodeLayer").hidden) closePostcode();
+  else if (!$("#doneView").hidden) showDone(false);
   else closeSheet();
 });
 

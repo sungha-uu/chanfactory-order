@@ -7,7 +7,7 @@
     <meta name="description" content="찬팩토리 오늘의 반찬 문자 주문" />
     <title>찬팩토리 | 오늘의 반찬 주문</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-    <link rel="stylesheet" href="./styles.css?v=4" />
+    <link rel="stylesheet" href="./styles.css?v=5" />
   </head>
   <body>
     <header class="appbar" id="appbar">
@@ -36,30 +36,49 @@
       <section class="address" id="addressSection" data-delivery-only aria-labelledby="addressTitle">
         <div id="addressEdit">
           <h2 id="addressTitle" class="block-title">배달 받을 주소</h2>
-          <p class="block-desc">단지명이나 동 이름이 들어가게 입력해 주세요.</p>
-          <form id="addressForm" class="address-form" novalidate>
+          <p class="block-desc">도로명, 아파트 이름, 지번으로 찾을 수 있어요.</p>
+          <button type="button" id="postcodeOpen" class="search-field">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <span>주소 검색</span>
+          </button>
+          <button type="button" id="manualToggle" class="link-btn manual-toggle">검색이 안 되면 직접 입력하기</button>
+          <form id="addressForm" class="address-form" novalidate hidden>
             <input id="address" class="input" name="address" autocomplete="street-address" placeholder="예: 초롱꽃마을 6단지" aria-label="받으실 주소" />
             <button type="submit" class="btn-dark">확인</button>
           </form>
-          <input id="addressDetail" class="input" autocomplete="address-line2" placeholder="동·호수 (예: 601동 1203호)" aria-label="상세 주소" />
           <p id="deliveryError" class="error-text" role="alert" hidden></p>
           <div class="hint-row">
             <span>테스트 주소</span>
-            <button type="button" data-address="파주 와동동 초롱꽃마을 6단지">초롱꽃마을</button>
+            <button type="button" data-address="경기 파주시 숲속노을로 60 (초롱꽃마을10단지)">초롱꽃마을</button>
             <button type="button" data-address="파주 목동동 1100">목동동</button>
             <button type="button" data-address="파주 문발동 600">문발동</button>
           </div>
         </div>
 
-        <div id="addressDone" class="address-done" hidden>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
-          <div class="address-done__body">
-            <strong id="addressText"></strong>
-            <span id="zoneName"></span>
+        <div id="addressDone" hidden>
+          <h2 class="block-title">배달 받을 주소</h2>
+          <div class="address-done">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+            <div class="address-done__body">
+              <strong id="addressText"></strong>
+              <span id="zoneName"></span>
+            </div>
+            <button type="button" id="addressChange" class="link-btn">변경</button>
           </div>
-          <button type="button" id="addressChange" class="link-btn">변경</button>
+          <input id="addressDetail" class="input" autocomplete="address-line2" placeholder="상세 주소 (예: 601동 1203호)" aria-label="상세 주소" />
         </div>
       </section>
+
+      <div id="postcodeLayer" class="postcode" role="dialog" aria-modal="true" aria-labelledby="postcodeTitle" hidden>
+        <header class="appbar appbar--sheet">
+          <button id="postcodeClose" class="appbar__icon" type="button" aria-label="닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7" /></svg>
+          </button>
+          <span class="appbar__title" id="postcodeTitle">주소 검색</span>
+        </header>
+        <div id="postcodeFrame" class="postcode__frame"></div>
+        <p id="postcodeError" class="empty" hidden>주소 검색을 불러오지 못했어요. 닫고 직접 입력해 주세요.</p>
+      </div>
 
       <nav class="tabs" id="tabs" aria-label="메뉴 분류">
         <div class="tabs__search" id="searchBox" hidden>
@@ -78,7 +97,7 @@
       <div id="menuList" class="menu-list" aria-live="polite"></div>
       <p id="emptyMenu" class="empty" hidden>찾는 반찬이 없어요.</p>
       <p id="menuLoadError" class="empty" hidden>메뉴를 불러오지 못했어요. 잠시 후 새로고침해 주세요.</p>
-      <p class="footnote">입력한 주소와 주문 내용은 이 휴대폰 밖으로 전송되지 않고, 주문 문자를 만드는 데만 쓰여요.</p>
+      <p class="footnote">주소 검색은 카카오 우편번호 서비스를 이용해요. 이름·주문 내용은 이 휴대폰 밖으로 전송되지 않고 주문 문자를 만드는 데만 쓰여요.</p>
     </main>
 
     <aside class="bottom" id="bottomBar" aria-label="장바구니">
@@ -175,6 +194,6 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <script type="module" src="./app.js?v=4"></script>
+    <script type="module" src="./app.js?v=5"></script>
   </body>
 </html>
