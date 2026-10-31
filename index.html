@@ -7,7 +7,7 @@
     <meta name="description" content="찬팩토리 오늘의 반찬 문자 주문" />
     <title>찬팩토리 | 오늘의 반찬 주문</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-    <link rel="stylesheet" href="./styles.css?v=5" />
+    <link rel="stylesheet" href="./styles.css?v=6" />
   </head>
   <body>
     <header class="appbar" id="appbar">
@@ -165,6 +165,25 @@
             <pre id="smsPreview"></pre>
           </details>
         </section>
+
+        <section class="s-block">
+          <h3>개인정보 수집·이용 안내</h3>
+          <dl class="privacy">
+            <div><dt>항목</dt><dd>이름, 배달 주소, 휴대폰 번호(주문 문자 발신 번호), 요청사항</dd></div>
+            <div><dt>목적</dt><dd>주문 확인, 배달, 주문 관련 안내 문자</dd></div>
+            <div><dt>보관</dt><dd>주문 완료 후 <span data-retention>3개월</span>이 지나면 삭제</dd></div>
+            <div data-delivery-only><dt>위탁</dt><dd>배달 업무를 배달대행업체에 맡길 수 있어요</dd></div>
+          </dl>
+          <p class="note">주소 검색은 카카오 우편번호 서비스를 이용해요. 이 페이지는 입력한 내용을 서버에 저장하지 않고, 손님이 직접 보내는 문자로만 매장에 전달돼요.</p>
+          <a class="privacy__link" href="./privacy.html" target="_blank" rel="noopener">개인정보 처리방침 전체 보기</a>
+          <label class="check">
+            <input type="checkbox" id="privacyAgree" />
+            <span class="check__box" aria-hidden="true">
+              <svg viewBox="0 0 20 20"><path d="m5 10.5 3.2 3.2L15 7" /></svg>
+            </span>
+            <span class="check__label"><b>(필수)</b> 위 내용을 확인했어요</span>
+          </label>
+        </section>
       </div>
 
       <footer class="sheet__foot">
@@ -194,6 +213,6 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <script type="module" src="./app.js?v=5"></script>
+    <script type="module" src="./app.js?v=6"></script>
   </body>
 </html>

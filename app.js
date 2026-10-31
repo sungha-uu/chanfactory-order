@@ -4,6 +4,8 @@ const STORE = {
   minimumOrder: 25000,
   deliveryFee: 1000,
   orderClose: "18:30",
+  // 운영 전 확정: 주문 문자 보관 기간 (privacy.html과 같게)
+  privacyRetention: "3개월",
 };
 
 // 테스트 데이터: 기본 배달 지역과 추가배달료 단지. 운영 전 실제 지역으로 교체한다.
@@ -452,6 +454,7 @@ function buildOrderText() {
     isPickup() ? `메뉴 ${money(subtotal)}` : `메뉴 ${money(subtotal)} + 배달팁 ${money(deliveryFee)}`,
     `합계 ${money(grandTotal)}`,
     `요청: ${$("#requestNote").value.trim() || "없음"}`,
+    "개인정보 수집·이용 안내 확인함",
   ].join("\n");
 }
 
@@ -461,6 +464,11 @@ function validateOrder() {
   if (cartDetails().length === 0) return "주문할 메뉴를 담아 주세요.";
   if (subtotal < STORE.minimumOrder) return `메뉴 금액이 ${money(STORE.minimumOrder)} 이상이어야 주문할 수 있어요.`;
   if (!$("#customerName").value.trim()) return "주문하시는 분 이름을 입력해 주세요.";
+  if (!$("#privacyAgree").checked) {
+    $(".check").classList.add("is-invalid");
+    $(".check").scrollIntoView({ behavior: "smooth", block: "center" });
+    return "개인정보 수집·이용 안내를 확인해 주세요.";
+  }
   return null;
 }
 
@@ -565,6 +573,10 @@ document.querySelectorAll("[data-address]").forEach((button) => {
 });
 
 $("#addressChange").addEventListener("click", editAddress);
+$("#privacyAgree").addEventListener("change", () => {
+  $(".check").classList.remove("is-invalid");
+  showSheetError("");
+});
 $("#postcodeOpen").addEventListener("click", openPostcode);
 $("#postcodeClose").addEventListener("click", closePostcode);
 $("#manualToggle").addEventListener("click", () => {
@@ -658,6 +670,7 @@ function initHeader() {
   $("#openStatus").textContent = closed ? `오늘 주문 마감 (${STORE.orderClose})` : `오늘 ${STORE.orderClose} 주문 마감`;
   $("#openStatus").classList.toggle("is-closed", closed);
   $("#minOrderText").textContent = money(STORE.minimumOrder);
+  document.querySelectorAll("[data-retention]").forEach((node) => { node.textContent = STORE.privacyRetention; });
   $("#doneNumber").textContent = formatPhone(STORE.smsNumber);
   $("#doneNumber").href = `sms:${STORE.smsNumber}`;
 }
