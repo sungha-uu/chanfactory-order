@@ -444,10 +444,25 @@ function applyPostcode(data) {
 
 /* ---------- 주문 문자 ---------- */
 
-function makeOrderCode() {
+// 주문번호는 "주문서를 열어서 보내기까지"를 주문 1회로 본다.
+// 페이지를 열 때 한 번 만들고, 같은 페이지에서 다시 보내면(문자 앱에서 뒤로 갔다 다시 누름) 같은 번호를 쓴다.
+// PC는 같은 손님·같은 번호를 중복 또는 수정으로 처리한다.
+const CODE_CHARS = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"; // 헷갈리는 0·O·1·I·L 제외
+
+function todayKey() {
   const now = new Date();
-  const mmdd = `${now.getMonth() + 1}`.padStart(2, "0") + `${now.getDate()}`.padStart(2, "0");
-  return `${mmdd}-${Math.floor(Math.random() * 9000 + 1000)}`;
+  return `${now.getMonth() + 1}`.padStart(2, "0") + `${now.getDate()}`.padStart(2, "0");
+}
+
+function makeOrderCode() {
+  const random = crypto.getRandomValues(new Uint8Array(4));
+  return `${todayKey()}-${[...random].map((n) => CODE_CHARS[n % CODE_CHARS.length]).join("")}`;
+}
+
+function orderCode() {
+  // 페이지를 열어 둔 채 날짜가 바뀌었으면 새 주문으로 본다.
+  if (!state.orderCode?.startsWith(todayKey())) state.orderCode = makeOrderCode();
+  return state.orderCode;
 }
 
 function buildOrderText() {
@@ -456,7 +471,7 @@ function buildOrderText() {
   const time = document.querySelector('input[name="deliveryTime"]:checked')?.value || "가능한 빨리";
   const lines = details.map(({ item, quantity }) => `${item.name}${item.unit ? `(${item.unit})` : ""} x${quantity} ${money(item.price * quantity)}`);
   return [
-    `[${STORE.name} 주문] #${state.orderCode}`,
+    `[${STORE.name} 주문] #${orderCode()}`,
     `수령: ${isPickup() ? "픽업" : "배달"}`,
     `이름: ${$("#customerName").value.trim() || "-"}`,
     ...(isPickup() ? [] : [`주소: ${fullAddress() || "-"}`]),
